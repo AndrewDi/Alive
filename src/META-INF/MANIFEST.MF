@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: lib/db2jcc_license_cu.jar lib/db2jcc.jar lib/logback-classic-1.1.7.jar
+  lib/logback-core-1.1.7.jar lib/slf4j-api-1.7.20.jar lib/quartz-2.2.2.jar lib/c3p0-0.9.1.1.jar lib/slf4j-api-1.7.7.jar
+Main-Class: com.andrew.Main
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="164feeea-92e0-4cf0-ac39-239ef43f06ac" name="Alive" url="http://9.110.87.146">
+        <fileTransfer host="9.110.87.146" port="22" rootFolder="/data/dsminst1" accessType="SFTP" password="df9bdf98df99df9edfdbdfdddfcfdfd8" username="dsminst1">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
