@@ -22,6 +22,7 @@ public class DB2InfoModel {
     private String Status;
     private String Message;
     private String UIDApp;
+    private String VIPList;
     private LocalDateTime LastConnectTime;
 
     public DB2InfoModel(int id, String LDBID, String IP, int port, String DBName, String DBAlias, String user, String passwd) {
@@ -170,11 +171,22 @@ public class DB2InfoModel {
         LastConnectTime = lastConnectTime;
     }
 
+    public String getVIPList() {
+        return VIPList;
+    }
+
+    public void setVIPList(String VIPList) {
+        this.VIPList = VIPList;
+    }
+
     @Override
     public String toString() {
         return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();
     }
 
+    public String makeString(String vip){
+        return this.getDBName()+":"+this.getLDBID()+":"+vip+":"+this.getPort();
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
