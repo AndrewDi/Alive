@@ -18,17 +18,19 @@ public class DB2Info {
     public ConcurrentHashMap<String,DB2InfoModel> getDB2InfoList(){
         Connection connection= null;
         ConcurrentHashMap<String,DB2InfoModel> db2List = new ConcurrentHashMap<>();
-        String sql="select ldb.ldbid,ldb.dbname,ldb.vip as viplist,ldb.port,ldb.dbuser,DECODE(?,' ',ldb.DBPASS,DECRYPT_CHAR(CAST(ldb.DBPASS as VARCHAR(64) FOR BIT DATA),?)) as DBPASS,DECODE(ldb.dbalias,null,ldb.DBNAME,ldb.dbalias) as DBALIAS,ldb.valid,uid.vip,uid.status,uid.lastupdatetime,uid.uidapp " +
-                "from cmdb.ldbinfo as ldb full join dbi.dbuid as uid on (ldb.ldbid,ldb.dbname)=(uid.ldbid,uid.dbname)" +
-                "WHERE ldb.valid in ('Y','M') AND ldb.vip IS NOT NULL AND ldb.port IS NOT NULL AND ldb.dbname IS NOT NULL AND ldb.dbuser IS NOT NULL " +
-                "AND (uid.uidapp=? OR uid.uidapp IS NULL OR (uid.uidapp!=? AND (uid.lastupdatetime IS NULL OR uid.lastupdatetime < current timestamp - ? MINUTES)))";
+        String sql="SELECT LDB.LDBID,LDB.DBNAME,LDB.VIP AS VIPLIST,LDB.PORT,LDB.DBUSER,DECODE(?,' ',LDB.DBPASS,DECRYPT_CHAR(CAST(LDB.DBPASS AS VARCHAR(64) FOR BIT DATA),?)) AS DBPASS,DECODE(LDB.DBALIAS,NULL,LDB.DBNAME,LDB.DBALIAS) AS DBALIAS,LDB.VALID,UID.VIP,UID.STATUS,UID.LASTUPDATETIME,UID.UIDAPP " +
+                "FROM CMDB.LDBINFO AS LDB FULL JOIN DBI.DBUID AS UID ON (LDB.LDBID,LDB.DBNAME)=(UID.LDBID,UID.DBNAME)" +
+                "WHERE LDB.VALID IN ('Y','M') AND LDB.VIP IS NOT NULL AND LDB.PORT IS NOT NULL AND LDB.DBNAME IS NOT NULL AND LDB.DBUSER IS NOT NULL " +
+                "AND (UID.UIDAPP=? OR UID.UIDAPP IS NULL OR (UID.UIDAPP!=? AND (UID.LASTUPDATETIME IS NULL OR UID.LASTUPDATETIME < CURRENT TIMESTAMP - ? MINUTES)))";
+        String SQL_CMDB_LDBINFO="SELECT LDBID,DBNAME,VIP AS VIPLIST,PORT,DBUSER,DECODE(?,' ',DBPASS,DECRYPT_CHAR(CAST(DBPASS AS VARCHAR(64) FOR BIT DATA),?)) AS DBPASS,DECODE(DBALIAS,NULL,DBNAME,DBALIAS) AS DBALIAS,VALID " +
+                "FROM CMDB.LDBINFO WHERE VALID IN ('Y','M') AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL";
+        String SQL_UID_DBUID="SELECT LDBID,DBNAME,PORT,VIP,STATUS,TIMESTAMPDIFF(2,CHAR(CURRENT TIMESTAMP - NVL(LASTUPDATETIME,CURRENT TIMESTAMP - 30 MINUTES))) as TONOW,UIDAPP FROM DBI.DBUID ";
+        String SQL_DELETE_DBUID="DELETE FROM DBI.DBUID WHERE LDBID=? AND DBNAME=? AND VIP=?";
         try {
-            log.debug(String.format("select ldb.ldbid,ldb.dbname,ldb.vip as viplist,ldb.port,ldb.dbuser,DBPASS,DECODE(ldb.dbalias,null,ldb.DBNAME,ldb.dbalias) as DBALIAS,ldb.valid,uid.vip,uid.status,uid.lastupdatetime,uid.uidapp " +
-                    "                from cmdb.ldbinfo as ldb full join dbi.dbuid as uid on (ldb.ldbid,ldb.dbname)=(uid.ldbid,uid.dbname) " +
-                    "                WHERE ldb.valid in ('Y','M') AND ldb.vip IS NOT NULL AND ldb.port IS NOT NULL AND ldb.dbname IS NOT NULL AND ldb.dbuser IS NOT NULL" +
-                    "                AND (uid.uidapp='%s' OR uid.uidapp IS NULL OR (uid.uidapp!='%s' AND (uid.lastupdatetime IS NULL OR uid.lastupdatetime < current timestamp - %d MINUTES)))",AppConf.getConf().getAppFlag(),AppConf.getConf().getAppFlag(),AppConf.getConf().getMax_allow_ha_interval()));
+            log.debug(SQL_CMDB_LDBINFO);
+            log.debug(SQL_UID_DBUID);
             connection = ConnectionUtils.getConnection(AppConf.getConf().getDbmdb_ip(),AppConf.getConf().getDbmdb_port(),AppConf.getConf().getDbmdb_dbname(),AppConf.getConf().getDbmdb_username(),AppConf.getConf().getDbmdb_passwd());
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = connection.prepareStatement(SQL_CMDB_LDBINFO);
             if(!AppConf.getConf().getEncryptPass().trim().isEmpty()){
                 ps.setString(1,AppConf.getConf().getEncryptPass());
                 ps.setString(2,AppConf.getConf().getEncryptPass());
@@ -37,42 +39,51 @@ public class DB2Info {
                 ps.setString(1," ");
                 ps.setString(2," ");
             }
-            ps.setString(3,AppConf.getConf().getAppFlag());
-            ps.setString(4,AppConf.getConf().getAppFlag());
-            ps.setInt(5,AppConf.getConf().getMax_allow_ha_interval());
             ResultSet rs = ps.executeQuery();
             while (rs.next())
             {
                 int id=0;
-                if(rs.getString("VIP")==null||rs.getString("VIP").isEmpty()){
-                    for(String vip:rs.getString("VIPLIST").split(",")) {
-                        DB2InfoModel db2InfoModel = new DB2InfoModel(id,rs.getString("LDBID"),vip,rs.getInt("PORT"),rs.getString("DBNAME"),rs.getString("DBALIAS"),rs.getString("DBUSER"),rs.getString("DBPASS"));
-                        db2InfoModel.setUIDApp(rs.getString("UIDAPP"));
-                        db2InfoModel.setVIPList(rs.getString("VIPLIST"));
-                        db2List.put(db2InfoModel.toString(),db2InfoModel);
-                        id++;
-                    }
-                }
-                else if(rs.getString("VIPLIST").contains(rs.getString("VIP"))){
-                    DB2InfoModel db2InfoModel = new DB2InfoModel(id,rs.getString("LDBID"),rs.getString("VIP"),rs.getInt("PORT"),rs.getString("DBNAME"),rs.getString("DBALIAS"),rs.getString("DBUSER"),rs.getString("DBPASS"));
-                    db2InfoModel.setUIDApp(rs.getString("UIDAPP"));
+                for(String vip:rs.getString("VIPLIST").split(",")) {
+                    DB2InfoModel db2InfoModel = new DB2InfoModel(id,rs.getString("LDBID"),vip,rs.getInt("PORT"),rs.getString("DBNAME"),rs.getString("DBALIAS"),rs.getString("DBUSER"),rs.getString("DBPASS"));
                     db2InfoModel.setVIPList(rs.getString("VIPLIST"));
                     db2List.put(db2InfoModel.toString(),db2InfoModel);
+                    id++;
                 }
             }
             rs.close();
             ps.close();
-            connection.close();
-            for(DB2InfoModel db2InfoModel:db2List.values()){
-                for(String vip:db2InfoModel.getVIPList().split(",")){
-                    if(!db2List.containsKey(db2InfoModel.makeString(vip))){
-                        DB2InfoModel newinfoModel = new DB2InfoModel(db2InfoModel.getId()+1,db2InfoModel.getLDBID(),vip,db2InfoModel.getPort(),db2InfoModel.getDBName(),db2InfoModel.getDBAlias(),db2InfoModel.getUser(),db2InfoModel.getPasswd());
-                        db2InfoModel.setUIDApp(db2InfoModel.getUIDApp());
-                        db2InfoModel.setVIPList(db2InfoModel.getVIPList());
-                        db2List.put(newinfoModel.toString(),newinfoModel);
-                    }
+            rs=connection.createStatement().executeQuery(SQL_UID_DBUID);
+            while (rs.next()){
+                String LDBID=rs.getString("LDBID");
+                String DBNAME=rs.getString("DBNAME");
+                int PORT=rs.getInt("PORT");
+                String VIP=rs.getString("VIP");
+                int STATUS=rs.getInt("STATUS");
+                int TONOW=rs.getInt("TONOW");
+                String UIDAPP=rs.getString("UIDAPP");
+                String uidString = DB2InfoModel.makeString(DBNAME,LDBID,VIP,PORT);
+                String myAppFlag = AppConf.getConf().getAppFlag();
+                if(UIDAPP.equals(myAppFlag)&&db2List.containsKey(uidString)){
+                    db2List.get(uidString).setUIDApp(UIDAPP);
+                    db2List.get(uidString).setSQLCode(STATUS);
+                }
+                else if(!UIDAPP.equals(myAppFlag)&&TONOW>AppConf.getConf().getMax_allow_ha_interval()*60&&db2List.containsKey(uidString)){
+                    db2List.get(uidString).setUIDApp(UIDAPP);
+                }
+                else if(!UIDAPP.equals(myAppFlag)&&TONOW<=AppConf.getConf().getMax_allow_ha_interval()*60&&db2List.containsKey(uidString)){
+                    db2List.remove(uidString);
+                }
+                else if(!db2List.containsKey(uidString)){
+                    PreparedStatement psDelete = connection.prepareStatement(SQL_DELETE_DBUID);
+                    psDelete.setString(1,LDBID);
+                    psDelete.setString(2,DBNAME);
+                    psDelete.setString(3,VIP);
+                    psDelete.execute();
+                    psDelete.close();
                 }
             }
+            rs.close();
+            connection.close();
         } catch (SQLException e) {
             log.error(e.getMessage().toString());
         }

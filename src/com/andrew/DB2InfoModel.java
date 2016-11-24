@@ -184,8 +184,8 @@ public class DB2InfoModel {
         return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();
     }
 
-    public String makeString(String vip){
-        return this.getDBName()+":"+this.getLDBID()+":"+vip+":"+this.getPort();
+    public static String makeString(String dbname,String ldbid,String vip,int port){
+        return dbname+":"+ldbid+":"+vip+":"+port;
     }
     @Override
     public boolean equals(Object o) {
