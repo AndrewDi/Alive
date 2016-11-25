@@ -60,8 +60,15 @@ public class AppConf {
 
     public String getAppFlag() {
         if(appFlag==null||appFlag.isEmpty()) {
-            if (System.getenv("HOSTNAME") != null)
-                this.appFlag = System.getenv("HOSTNAME");
+            if (System.getenv("HOSTNAME") != null) {
+                String hostname = System.getenv("HOSTNAME");
+                if(hostname.indexOf('.')>0){
+                    this.appFlag=hostname.substring(0,hostname.indexOf('.'));
+                }
+                else {
+                    this.appFlag=hostname;
+                }
+            }
             else
                 this.appFlag = "UIDSnap";
         }

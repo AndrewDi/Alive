@@ -25,6 +25,7 @@ public class RefreshDB2InfoList implements Job {
         this.jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         AliveSchedule aliveSchedule = (AliveSchedule)this.jobDataMap.get(AliveSchedule.class.toString());
         aliveSchedule.refreshDB2InfoList();
+        /**
         ConcurrentLinkedQueue<DB2InfoModel> updateList = aliveSchedule.updateLastTimestampQueue;
         if(this.jobDataMap.containsKey("DBConn")){this.connection=(Connection) this.jobDataMap.get("DBConn");}
         for(DB2InfoModel db2InfoModel:updateList){
@@ -32,6 +33,7 @@ public class RefreshDB2InfoList implements Job {
                 updateList.remove(db2InfoModel);
             }
         }
+         **/
         log.info("End refresh db2 job list");
     }
 

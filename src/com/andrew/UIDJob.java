@@ -144,15 +144,15 @@ public class UIDJob implements InterruptableJob {
         }
         catch (SQLInvalidAuthorizationSpecException e){
             //IF SQLState = "28000" Then affect maxretry Times
-            if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
-                this.db2InfoModel.addRetry();
-            }
+            //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
+            //    this.db2InfoModel.addRetry();
+            //}
             log.error(String.format("[%s] Catch SQLInvalidAuthorizationSpecException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
         }
         catch (SQLException e) {
-            if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
-                this.db2InfoModel.addRetry();
-            }
+            //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
+            //    this.db2InfoModel.addRetry();
+            //}
             this.SQLCode = e.getErrorCode();
             this.Message = e.getMessage().toString();
             if(e instanceof DB2Diagnosable)
@@ -164,7 +164,8 @@ public class UIDJob implements InterruptableJob {
                     log.error(String.format("[%s] Catch SQLException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
                     //IF HADR Related Error,No more try
                     if(this.SQLCode==-1776||this.SQLCode==-1773){
-                        this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
+                        //this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
+
                     }
                 }
                 else {

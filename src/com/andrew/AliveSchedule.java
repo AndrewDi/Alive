@@ -41,7 +41,7 @@ public class AliveSchedule {
             }
             scheduler = factory.getScheduler();
             db2InfoList = new DB2InfoList();
-            updateLastTimestampQueue = new ConcurrentLinkedQueue<DB2InfoModel>();
+            //updateLastTimestampQueue = new ConcurrentLinkedQueue<DB2InfoModel>();
             updateUIDStatusQueue = new ConcurrentLinkedQueue<DB2InfoModel>();
         } catch (SchedulerException e) {
             log.error(e.getMessage().toString());
@@ -187,7 +187,7 @@ public class AliveSchedule {
                         .repeatForever())
                 .build();
         log.info("Build Trigger " + trigger.getKey().getName());
-        this.updateLastTimestampQueue.add(db2InfoModel);
+        //this.updateLastTimestampQueue.add(db2InfoModel);
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
@@ -216,16 +216,11 @@ public class AliveSchedule {
                 this.AddJob(db2InfoModel);
                 log.info("Update Job in List:"+db2InfoModel.toString());
             }
-            else if (this.db2InfoList.getDB2Info(db2InfoModel.toString())!=null&&this.db2InfoList.getDB2Info(db2InfoModel.toString()).equals(db2InfoModel)){
-                this.updateLastTimestampQueue.add(db2InfoModel);
-            }
         }
-        for (DB2InfoModel db2InfoModel:this.db2InfoList.getDb2List().values()){
-            if(!db2InfoArrayList.containsKey(db2InfoModel.toString())){
-                this.deleteJob(db2InfoModel.toString());
-                this.db2InfoList.RemoveDB2Info(db2InfoModel);
-                log.info("Delete job from List:"+db2InfoModel.toString()+" Job has Been running on "+db2InfoModel.getUIDApp());
-            }
-        }
+        this.db2InfoList.getDb2List().values().stream().filter(db2InfoModel -> !db2InfoArrayList.containsKey(db2InfoModel.toString())).forEach(db2InfoModel -> {
+            this.deleteJob(db2InfoModel.toString());
+            this.db2InfoList.RemoveDB2Info(db2InfoModel);
+            log.info("Delete job from List:" + db2InfoModel.toString() + " Job has Been running on " + db2InfoModel.getUIDApp());
+        });
     }
 }
