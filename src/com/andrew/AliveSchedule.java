@@ -260,4 +260,8 @@ public class AliveSchedule {
         this.db2InfoList.getDB2Info(jobkey).setMaxRetry(0);
         return true;
     }
+
+    public DB2InfoModel getDB2InfoModelByJobkey(String jobkey){
+        return this.db2InfoList.getDB2Info(jobkey);
+    }
 }

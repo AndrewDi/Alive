@@ -84,6 +84,8 @@ public class UIDJob implements InterruptableJob {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         this.db2InfoModel = (DB2InfoModel)jobDataMap.get(DB2InfoModel.class.toString());
+        if(this.db2InfoModel.getValid().equals("N"))
+            return;
         this.aliveSchedule = (AliveSchedule)jobDataMap.get(AliveSchedule.class.toString());
         if(!db2InfoModel.isPingable()) {
             log.debug("Checking connection for ip:"+db2InfoModel.getIP());

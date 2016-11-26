@@ -36,4 +36,24 @@ public class RestControllerApi {
         log.info("Reset Current Retry Times,JobKey:"+jobkey);
         return this.aliveSchedule.resetRetry(jobkey);
     }
+
+    @RequestMapping(value = "/markinvalid/{jobkey}",method = RequestMethod.POST)
+    public Boolean markInvalid(@PathVariable("jobkey") String jobkey){
+        log.info("Mark Invalid,JobKey:"+jobkey);
+        if(this.aliveSchedule.getDB2InfoModelByJobkey(jobkey)==null){
+            return false;
+        }
+        this.aliveSchedule.getDB2InfoModelByJobkey(jobkey).setValid("N");
+        return true;
+    }
+
+    @RequestMapping(value = "/markvalid/{jobkey}",method = RequestMethod.POST)
+    public Boolean markValid(@PathVariable("jobkey") String jobkey){
+        log.info("Mark Invalid,JobKey:"+jobkey);
+        if(this.aliveSchedule.getDB2InfoModelByJobkey(jobkey)==null){
+            return false;
+        }
+        this.aliveSchedule.getDB2InfoModelByJobkey(jobkey).setValid("Y");
+        return true;
+    }
 }
