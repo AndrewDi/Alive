@@ -44,12 +44,20 @@ public class UIDJob implements InterruptableJob {
 
     @Override
     public void interrupt() throws UnableToInterruptJobException {
+        if(!this.jobDataMap.containsKey("startTime")) {
+            disconnect();
+            return;
+        }
         long startTime = this.jobDataMap.getLong("startTime");
         long endTime = System.currentTimeMillis();
         disconnect();
         this.db2InfoModel.setSQLCode(this.SQLCode);
         this.db2InfoModel.setStatus(this.Status);
         this.db2InfoModel.setMessage(String.format("Interrupt Job,Duration:%d",endTime-startTime));
+        if(this.jobDataMap.containsKey("Delete_FLAG")&&this.jobDataMap.getBoolean("Delete_FLAG")){
+            log.info("About to Delete job from List:" + db2InfoModel.toString());
+            return;
+        }
         if(aliveSchedule!=null) {
             aliveSchedule.AddUpdateUIDStatusJob(this.db2InfoModel);
         }
@@ -107,6 +115,7 @@ public class UIDJob implements InterruptableJob {
                     throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toString()),"Connect-Failed",-2);
                 }
                 this.db2InfoModel.setLastConnectTime(LocalDateTime.now());
+                this.aliveSchedule.addConnection(this.db2InfoModel.toString(),connection);
             }
 
 
