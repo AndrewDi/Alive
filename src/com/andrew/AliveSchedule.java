@@ -249,4 +249,15 @@ public class AliveSchedule {
             log.info("Delete job from List:" + db2InfoModel.toString() + " Job has Been running on " + db2InfoModel.getUIDApp());
         });
     }
+
+    public ConcurrentHashMap<String,DB2InfoModel> getDb2List(){
+        return this.db2InfoList.getDb2List();
+    }
+
+    public boolean resetRetry(String jobkey){
+        if(this.db2InfoList.getDB2Info(jobkey)==null)
+            return false;
+        this.db2InfoList.getDB2Info(jobkey).setMaxRetry(0);
+        return true;
+    }
 }

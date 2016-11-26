@@ -1,0 +1,39 @@
+<component name="libraryTable">
+  <library name="org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE" type="repository">
+    <properties maven-id="org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-starter-web-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-starter-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-core-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-context-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-aop-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-beans-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-expression-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-autoconfigure-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-starter-logging-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/logback-classic-1.1.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/logback-core-1.1.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.20.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcl-over-slf4j-1.7.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jul-to-slf4j-1.7.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-over-slf4j-1.7.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/snakeyaml-1.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-boot-starter-tomcat-1.4.2.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tomcat-embed-core-8.5.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tomcat-embed-el-8.5.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tomcat-embed-websocket-8.5.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/hibernate-validator-5.2.4.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/validation-api-1.1.0.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jboss-logging-3.2.1.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/classmate-1.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.8.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.8.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.8.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-web-4.3.4.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spring-webmvc-4.3.4.RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

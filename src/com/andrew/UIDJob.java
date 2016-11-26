@@ -174,7 +174,6 @@ public class UIDJob implements InterruptableJob {
                     //IF HADR Related Error,No more try
                     if(this.SQLCode==-1776||this.SQLCode==-1773){
                         //this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
-
                     }
                 }
                 else {

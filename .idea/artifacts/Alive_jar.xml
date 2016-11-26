@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="Alive:jar">
+  <artifact build-on-make="true" name="Alive:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Alive_jar</output-path>
     <root id="root">
       <element id="archive" name="Alive.jar">
@@ -9,6 +9,7 @@
         <element id="library" level="project" name="db2jcc_license_cu" />
         <element id="library" level="project" name="ch.qos.logback:logback-classic:1.1.7" />
         <element id="library" level="project" name="org.quartz-scheduler:quartz:2.2.2" />
+        <element id="library" level="project" name="org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE" />
       </element>
       <element id="directory" name="conf">
         <element id="file-copy" path="$PROJECT_DIR$/src/appconf.properties" />

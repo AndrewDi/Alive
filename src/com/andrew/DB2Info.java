@@ -39,6 +39,7 @@ public class DB2Info {
                     DB2InfoModel db2InfoModel = new DB2InfoModel(id,rs.getString("LDBID"),vip,rs.getInt("PORT"),rs.getString("DBNAME"),rs.getString("DBALIAS"),rs.getString("DBUSER"),rs.getString("DBPASS"));
                     db2InfoModel.setVIPList(rs.getString("VIPLIST"));
                     db2InfoModel.setUIDFlag(rs.getString("UIDFLAG"));
+                    db2InfoModel.setValid(rs.getString("VALID"));
                     db2List.put(db2InfoModel.toString(),db2InfoModel);
                     id++;
                 }
