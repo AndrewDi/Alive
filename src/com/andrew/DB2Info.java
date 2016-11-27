@@ -77,9 +77,14 @@ public class DB2Info {
                     psDelete.close();
                 }
             }
-            db2List.values().stream().filter(db2InfoModel -> !db2InfoModel.getUIDFlag().equals(AppConf.getConf().getUid_flag())).forEach(db2InfoModel -> {
-                db2List.remove(db2InfoModel.toString());
-            });
+            for(DB2InfoModel db2InfoModel:db2List.values()){
+                if(null==db2InfoModel.getUIDFlag()||(null!=db2InfoModel&&!db2InfoModel.getUIDFlag().equals(AppConf.getConf().getUid_flag()))){
+                    db2List.remove(db2InfoModel.toString());
+                }
+                if(null==db2InfoModel.getUIDApp()){
+                    db2InfoModel.setUIDApp(AppConf.getConf().getAppFlag());
+                }
+            }
             rs.close();
             connection.close();
         } catch (SQLException e) {

@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -55,5 +57,12 @@ public class RestControllerApi {
         }
         this.aliveSchedule.getDB2InfoModelByJobkey(jobkey).setValid("Y");
         return true;
+    }
+
+    @RequestMapping("/status")
+    public SortedMap<String,Object> getStatus(){
+        SortedMap<String,Object> maps =  MemoryUsage.DisplayMemory();
+        maps.put("CurrentExecuting",this.aliveSchedule.getDb2List().values().toArray().length);
+        return maps;
     }
 }
