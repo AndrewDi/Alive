@@ -10,6 +10,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,6 +29,7 @@ public class AliveSchedule {
     private DB2InfoList db2InfoList = null;
     public ConcurrentLinkedQueue<DB2InfoModel> updateLastTimestampQueue = null;
     private ConcurrentLinkedQueue<DB2InfoModel> updateUIDStatusQueue = null;
+    private ConcurrentHashMap<String,Connection> uidJobConnections = null;
 
     private Scheduler scheduler = null;
 
@@ -43,6 +46,7 @@ public class AliveSchedule {
             db2InfoList = new DB2InfoList();
             //updateLastTimestampQueue = new ConcurrentLinkedQueue<DB2InfoModel>();
             updateUIDStatusQueue = new ConcurrentLinkedQueue<DB2InfoModel>();
+            uidJobConnections = new ConcurrentHashMap<>();
         } catch (SchedulerException e) {
             log.error(e.getMessage().toString());
         }
@@ -160,14 +164,36 @@ public class AliveSchedule {
 
     public boolean deleteJob(String jobKey){
         try {
+            this.scheduler.getJobDetail(new JobKey(jobKey)).getJobDataMap().put("Delete_FLAG",true);
+            this.scheduler.interrupt(new JobKey(jobKey));
             this.scheduler.pauseTrigger(new TriggerKey(jobKey));
             this.scheduler.unscheduleJob(new TriggerKey(jobKey));
+            this.removeConnection(jobKey);
             this.db2InfoList.RemoveDB2Info(jobKey);
         } catch (SchedulerException e) {
-            log.error(e.getStackTrace().toString());
+            log.error(e.getMessage().toString());
             return false;
         }
         return true;
+    }
+
+    public void addConnection(String jobkey,Connection connection){
+        this.removeConnection(jobkey);
+        this.uidJobConnections.put(jobkey, connection);
+    }
+
+    public void removeConnection(String jobkey){
+        if(this.uidJobConnections.containsKey(jobkey)){
+            Connection conn = this.uidJobConnections.get(jobkey);
+            try {
+                if(null!=conn&&!conn.isClosed()){
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e.getMessage().toString());
+            }
+            this.uidJobConnections.remove(jobkey);
+        }
     }
 
     public boolean AddJob(DB2InfoModel db2InfoModel){
@@ -205,22 +231,37 @@ public class AliveSchedule {
         DB2Info db2Info = new DB2Info();
         ConcurrentHashMap<String,DB2InfoModel> db2InfoArrayList= db2Info.getDB2InfoList();
         for(DB2InfoModel db2InfoModel:db2InfoArrayList.values()){
-            if(this.db2InfoList.getDB2Info(db2InfoModel.toString())==null&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
+            if(this.db2InfoList.getDB2Info(db2InfoModel.toString())==null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
                 this.db2InfoList.AddDB2Info(db2InfoModel);
                 this.AddJob(db2InfoModel);
                 log.info("Add new Job to List:"+db2InfoModel.toString());
             }
-            else if (this.db2InfoList.getDB2Info(db2InfoModel.toString())!=null&&!this.db2InfoList.getDB2Info(db2InfoModel.toString()).equals(db2InfoModel)){
+            else if (this.db2InfoList.getDB2Info(db2InfoModel.toString())!=null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&!this.db2InfoList.getDB2Info(db2InfoModel.toString()).equals(db2InfoModel)){
                 this.deleteJob(db2InfoModel.toString());
                 this.db2InfoList.ReplaceDB2Info(db2InfoModel);
                 this.AddJob(db2InfoModel);
                 log.info("Update Job in List:"+db2InfoModel.toString());
             }
         }
-        this.db2InfoList.getDb2List().values().stream().filter(db2InfoModel -> !db2InfoArrayList.containsKey(db2InfoModel.toString())).forEach(db2InfoModel -> {
+        this.db2InfoList.getDb2List().values().stream().filter(db2InfoModel -> !db2InfoArrayList.containsKey(db2InfoModel.toString())||(db2InfoArrayList.containsKey(db2InfoModel.toString())&&!db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag()))).forEach(db2InfoModel -> {
             this.deleteJob(db2InfoModel.toString());
             this.db2InfoList.RemoveDB2Info(db2InfoModel);
             log.info("Delete job from List:" + db2InfoModel.toString() + " Job has Been running on " + db2InfoModel.getUIDApp());
         });
+    }
+
+    public ConcurrentHashMap<String,DB2InfoModel> getDb2List(){
+        return this.db2InfoList.getDb2List();
+    }
+
+    public boolean resetRetry(String jobkey){
+        if(this.db2InfoList.getDB2Info(jobkey)==null)
+            return false;
+        this.db2InfoList.getDB2Info(jobkey).setMaxRetry(0);
+        return true;
+    }
+
+    public DB2InfoModel getDB2InfoModelByJobkey(String jobkey){
+        return this.db2InfoList.getDB2Info(jobkey);
     }
 }

@@ -23,6 +23,7 @@ public class DB2InfoModel {
     private String Message;
     private String UIDApp;
     private String VIPList;
+    private String UIDFlag;
     private LocalDateTime LastConnectTime;
 
     public DB2InfoModel(int id, String LDBID, String IP, int port, String DBName, String DBAlias, String user, String passwd) {
@@ -177,6 +178,14 @@ public class DB2InfoModel {
 
     public void setVIPList(String VIPList) {
         this.VIPList = VIPList;
+    }
+
+    public String getUIDFlag() {
+        return UIDFlag;
+    }
+
+    public void setUIDFlag(String UIDFlag) {
+        this.UIDFlag = UIDFlag;
     }
 
     @Override

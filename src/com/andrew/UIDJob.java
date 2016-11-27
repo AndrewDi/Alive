@@ -44,12 +44,20 @@ public class UIDJob implements InterruptableJob {
 
     @Override
     public void interrupt() throws UnableToInterruptJobException {
+        if(!this.jobDataMap.containsKey("startTime")) {
+            disconnect();
+            return;
+        }
         long startTime = this.jobDataMap.getLong("startTime");
         long endTime = System.currentTimeMillis();
         disconnect();
         this.db2InfoModel.setSQLCode(this.SQLCode);
         this.db2InfoModel.setStatus(this.Status);
         this.db2InfoModel.setMessage(String.format("Interrupt Job,Duration:%d",endTime-startTime));
+        if(this.jobDataMap.containsKey("Delete_FLAG")&&this.jobDataMap.getBoolean("Delete_FLAG")){
+            log.info("About to Delete job from List:" + db2InfoModel.toString());
+            return;
+        }
         if(aliveSchedule!=null) {
             aliveSchedule.AddUpdateUIDStatusJob(this.db2InfoModel);
         }
@@ -76,6 +84,8 @@ public class UIDJob implements InterruptableJob {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         this.db2InfoModel = (DB2InfoModel)jobDataMap.get(DB2InfoModel.class.toString());
+        if(this.db2InfoModel.getValid().equals("N"))
+            return;
         this.aliveSchedule = (AliveSchedule)jobDataMap.get(AliveSchedule.class.toString());
         if(!db2InfoModel.isPingable()) {
             log.debug("Checking connection for ip:"+db2InfoModel.getIP());
@@ -107,6 +117,7 @@ public class UIDJob implements InterruptableJob {
                     throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toString()),"Connect-Failed",-2);
                 }
                 this.db2InfoModel.setLastConnectTime(LocalDateTime.now());
+                this.aliveSchedule.addConnection(this.db2InfoModel.toString(),connection);
             }
 
 
@@ -165,7 +176,6 @@ public class UIDJob implements InterruptableJob {
                     //IF HADR Related Error,No more try
                     if(this.SQLCode==-1776||this.SQLCode==-1773){
                         //this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
-
                     }
                 }
                 else {
