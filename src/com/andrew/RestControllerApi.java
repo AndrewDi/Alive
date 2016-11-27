@@ -28,7 +28,7 @@ public class RestControllerApi {
 
     @RequestMapping(value = "/search/{key}",method = RequestMethod.POST)
     public Object[] getListBySearch(@PathVariable("key") String key){
-        return this.aliveSchedule.getDb2List().values().stream().filter(db2InfoModel -> db2InfoModel.getDBName().toUpperCase().contains(key.toUpperCase())||db2InfoModel.getIP().toUpperCase().contains(key.toUpperCase())).toArray();
+        return this.aliveSchedule.getDb2List().entrySet().stream().filter(entry -> entry.getValue().toString().contains(key)).toArray();
     }
 
     @RequestMapping(value = "/reset/{jobkey}",method = RequestMethod.POST)
@@ -49,7 +49,7 @@ public class RestControllerApi {
 
     @RequestMapping(value = "/markvalid/{jobkey}",method = RequestMethod.POST)
     public Boolean markValid(@PathVariable("jobkey") String jobkey){
-        log.info("Mark Invalid,JobKey:"+jobkey);
+        log.info("Mark valid,JobKey:"+jobkey);
         if(this.aliveSchedule.getDB2InfoModelByJobkey(jobkey)==null){
             return false;
         }

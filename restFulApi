@@ -1,5 +1,9 @@
 curl --data ''  http://localhost:11111/rest/reset/SAMPLE:198:9.110.87.146:50000/
 
+curl --data ''  http://localhost:11111/rest/markinvalid/SAMPLE:198:9.110.87.146:50000/
+
+curl --data ''  http://localhost:11111/rest/markvalid/SAMPLE:198:9.110.87.146:50000/
+
 curl --data ''  http://localhost:11111/rest/search/SAMPLE
 
 curl  http://localhost:11111/rest/getalllist
