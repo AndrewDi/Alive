@@ -230,6 +230,21 @@ public class AliveSchedule {
     public void refreshDB2InfoList(){
         DB2Info db2Info = new DB2Info();
         ConcurrentHashMap<String,DB2InfoModel> db2InfoArrayList= db2Info.getDB2InfoList();
+        /**
+        db2InfoArrayList.entrySet().stream().parallel().forEach(entry->{
+            if(this.db2InfoList.getDB2Info(entry.getValue().toString())==null&&entry.getValue().getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(entry.getValue().getIP(),entry.getValue().getPort())){
+                this.db2InfoList.AddDB2Info(entry.getValue());
+                this.AddJob(entry.getValue());
+                log.info("Add new Job to List:"+entry.getValue().toString());
+            }
+            else if (this.db2InfoList.getDB2Info(entry.getValue().toString())!=null&&entry.getValue().getUIDApp().equals(AppConf.getConf().getAppFlag())&&!this.db2InfoList.getDB2Info(entry.getValue().toString()).equals(entry.getValue())){
+                this.deleteJob(entry.getValue().toString());
+                this.db2InfoList.ReplaceDB2Info(entry.getValue());
+                this.AddJob(entry.getValue());
+                log.info("Update Job in List:"+entry.getValue().toString());
+            }
+        });
+         **/
         for(DB2InfoModel db2InfoModel:db2InfoArrayList.values()){
             if(this.db2InfoList.getDB2Info(db2InfoModel.toString())==null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
                 this.db2InfoList.AddDB2Info(db2InfoModel);
