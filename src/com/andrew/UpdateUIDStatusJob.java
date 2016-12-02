@@ -40,9 +40,9 @@ public class UpdateUIDStatusJob implements Job {
             }
             this.ps = this.connection.prepareStatement("MERGE INTO DBI.DBUID T " +
                     "USING table(values(?,?,?,?,?,?,?,?,?)) S (VIP,PORT,DBNAME,STATUS,PHASE,LDBID,UIDAPP,MESSAGE,LASTCONNECTTIME) " +
-                    "ON (T.VIP,T.PORT,T.DBNAME,T.LDBID)=(S.VIP,S.PORT,S.DBNAME,S.LDBID) " +
+                    "ON (T.VIP,T.PORT,T.DBNAME,T.LDBID,T.UIDAPP)=(S.VIP,S.PORT,S.DBNAME,S.LDBID,S.UIDAPP) " +
                     //"WHEN MATCHED AND S.STATUS=-6 THEN UPDATE SET STATUS=S.STATUS,LASTUPDATETIME=CURRENT TIMESTAMP,PHASE=S.PHASE,LASTCONNECTTIME=S.LASTCONNECTTIME,UIDAPP=S.UIDAPP " +
-                    "WHEN MATCHED AND (T.UIDAPP=S.UIDAPP OR (T.UIDAPP!=S.UIDAPP AND TIMESTAMPDIFF(2,CURRENT TIMESTAMP - T.LASTUPDATETIME)>60)) THEN UPDATE SET STATUS=S.STATUS,LASTUPDATETIME=CURRENT TIMESTAMP,PHASE=S.PHASE,MESSAGE=S.MESSAGE,LASTCONNECTTIME=S.LASTCONNECTTIME,UIDAPP=S.UIDAPP " +
+                    "WHEN MATCHED THEN UPDATE SET STATUS=S.STATUS,LASTUPDATETIME=CURRENT TIMESTAMP,PHASE=S.PHASE,MESSAGE=S.MESSAGE,LASTCONNECTTIME=S.LASTCONNECTTIME,UIDAPP=S.UIDAPP " +
                     "WHEN NOT MATCHED THEN INSERT (VIP,PORT,DBNAME,STATUS,LASTUPDATETIME,PHASE,LDBID,UIDAPP,MESSAGE,LASTCONNECTTIME)  VALUES (S.VIP,S.PORT,S.DBNAME,S.STATUS,CURRENT TIMESTAMP,S.PHASE,S.LDBID,S.UIDAPP,S.MESSAGE,S.LASTCONNECTTIME)");
 
             for(DB2InfoModel db2InfoModel:this.updateUIDStatusQueue) {
@@ -66,10 +66,22 @@ public class UpdateUIDStatusJob implements Job {
                 log.error(e.getMessage().toString());
                 e=e.getNextException();
             }
-            connection=null;
+            this.disconnect();
         }catch (Exception e){
             log.error(e.getMessage().toString());
+            this.disconnect();
+        }
+    }
+
+    private void disconnect(){
+        try {
+            if(connection!=null&&!connection.isClosed()){
+                connection.close();
+            }
             connection=null;
+        }
+        catch (SQLException e){
+            log.error(e.getMessage().toString());
         }
     }
 }

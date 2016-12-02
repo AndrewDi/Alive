@@ -229,9 +229,9 @@ public class AliveSchedule {
 
     public void refreshDB2InfoList(){
         DB2Info db2Info = new DB2Info();
-        ConcurrentHashMap<String,DB2InfoModel> db2InfoArrayList= db2Info.getDB2InfoList();
+        ConcurrentHashMap<String,DB2InfoModel> db2NewInfoList= db2Info.getDB2InfoList();
         /**
-        db2InfoArrayList.entrySet().stream().parallel().forEach(entry->{
+        db2NewInfoList.entrySet().stream().parallel().forEach(entry->{
             if(this.db2InfoList.getDB2Info(entry.getValue().toString())==null&&entry.getValue().getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(entry.getValue().getIP(),entry.getValue().getPort())){
                 this.db2InfoList.AddDB2Info(entry.getValue());
                 this.AddJob(entry.getValue());
@@ -244,8 +244,9 @@ public class AliveSchedule {
                 log.info("Update Job in List:"+entry.getValue().toString());
             }
         });
-         **/
-        for(DB2InfoModel db2InfoModel:db2InfoArrayList.values()){
+        **/
+
+        for(DB2InfoModel db2InfoModel:db2NewInfoList.values()){
             if(this.db2InfoList.getDB2Info(db2InfoModel.toString())==null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
                 this.db2InfoList.AddDB2Info(db2InfoModel);
                 this.AddJob(db2InfoModel);
@@ -258,7 +259,7 @@ public class AliveSchedule {
                 log.info("Update Job in List:"+db2InfoModel.toString());
             }
         }
-        this.db2InfoList.getDb2List().values().stream().filter(db2InfoModel -> !db2InfoArrayList.containsKey(db2InfoModel.toString())||(db2InfoArrayList.containsKey(db2InfoModel.toString())&&!db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag()))).forEach(db2InfoModel -> {
+        this.db2InfoList.getDb2List().values().stream().filter(db2InfoModel -> !db2NewInfoList.containsKey(db2InfoModel.toString())||(db2NewInfoList.containsKey(db2InfoModel.toString())&&!db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag()))).forEach(db2InfoModel -> {
             this.deleteJob(db2InfoModel.toString());
             this.db2InfoList.RemoveDB2Info(db2InfoModel);
             log.info("Delete job from List:" + db2InfoModel.toString() + " Job has Been running on " + db2InfoModel.getUIDApp());

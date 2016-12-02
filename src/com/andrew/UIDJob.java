@@ -186,6 +186,7 @@ public class UIDJob implements InterruptableJob {
                     log.error(String.format("[%s] Catch SQLException ErrorCode:%d SQLState:%s", db2InfoModel.toString(),this.SQLCode,this.Message));
                 }
             }
+            this.disconnect();
         }catch (Exception e){
             this.SQLCode=-4;
             if(!this.jobDataMap.containsKey("Interrupt")){
@@ -195,6 +196,7 @@ public class UIDJob implements InterruptableJob {
             else {
                 this.jobDataMap.remove("Interrupt");
             }
+            this.disconnect();
         }
         finally {
             this.db2InfoModel.setSQLCode(this.SQLCode);
