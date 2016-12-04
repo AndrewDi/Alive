@@ -169,7 +169,22 @@ public class UIDJob implements InterruptableJob {
                     log.error(String.format("[%s] Catch SQLException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
                     //IF HADR Related Error,No more try
                     if(this.SQLCode==-1776||this.SQLCode==-1773){
-                        //this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
+                        log.error("[HADR] Found HADR IP:"+this.db2InfoModel.toFullString());
+                        for(String vip:this.db2InfoModel.getVIPList().split(",")){
+                            if(!vip.equals(db2InfoModel.getIP())){
+                                try {
+                                    connection=ConnectionUtils.getConnection(vip,this.db2InfoModel.getPort(),this.db2InfoModel.getDBAlias(),this.db2InfoModel.getUser(),this.db2InfoModel.getPasswd());
+                                    if(connection!=null&&connection.isValid(5)&&!connection.isReadOnly()){
+                                        this.db2InfoModel.setIP(vip);
+                                        log.info("[HADR] Found non-HADR ip:"+this.db2InfoModel.toFullString());
+                                        break;
+                                    }
+                                }
+                                catch (SQLException connectSQLException){
+                                    this.disconnect();
+                                }
+                            }
+                        }
                     }
                 }
                 else {
