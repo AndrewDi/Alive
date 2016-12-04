@@ -190,11 +190,13 @@ public class DB2InfoModel {
 
     @Override
     public String toString() {
-        return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();
+        return this.getDBName()+":"+this.getLDBID();
     }
 
-    public static String makeString(String dbname,String ldbid,String vip,int port){
-        return dbname+":"+ldbid+":"+vip+":"+port;
+    public String toFullString() {return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();}
+
+    public static String makeString(String dbname,String ldbid){
+        return dbname+":"+ldbid;
     }
     @Override
     public boolean equals(Object o) {

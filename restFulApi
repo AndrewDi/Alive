@@ -1,11 +1,11 @@
-curl --data ''  http://localhost:11111/rest/reset/SAMPLE:198:9.110.87.146:50000/
+curl -s -d ''  http://localhost:11111/rest/reset/SAMPLE:198:9.110.87.146:50000/ |python -m json.tool
 
-curl --data ''  http://localhost:11111/rest/markinvalid/SAMPLE:198:9.110.87.146:50000/
+curl -s -d ''  http://localhost:11111/rest/markinvalid/SAMPLE:198:9.110.87.146:50000/ |python -m json.tool
 
-curl --data ''  http://localhost:11111/rest/markvalid/SAMPLE:198:9.110.87.146:50000/
+curl -s -d ''  http://localhost:11111/rest/markvalid/SAMPLE:198:9.110.87.146:50000/ |python -m json.tool
 
-curl --data ''  http://localhost:11111/rest/search/SAMPLE:198:9.110.87.146:50000
+curl -s -d ''  http://localhost:11111/rest/search/SAMPLE:198:9.110.87.146:50000 |python -m json.tool
 
-curl  http://localhost:11111/rest/getalllist
+curl -s  http://localhost:11111/rest/getalllist |python -m json.tool
 
-curl  http://localhost:11111/rest/status
+curl -s  http://localhost:11111/rest/status |python -m json.tool

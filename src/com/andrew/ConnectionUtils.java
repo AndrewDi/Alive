@@ -27,9 +27,9 @@ public class ConnectionUtils {
         db2DataSource.setUser(user);
         db2DataSource.setDatabaseName(dbname);
         db2DataSource.setRetrieveMessagesFromServerOnGetMessage(true);
-        db2DataSource.setTimeFormat(10);
         db2DataSource.setPassword(passwd);
         db2DataSource.setClientProgramName("UID_Alive");
+        db2DataSource.setConnectionTimeout(10);
         db2DataSource.setClientWorkstation(AppConf.getConf().getAppFlag());
         return db2DataSource.getConnection();
     }
@@ -53,5 +53,14 @@ public class ConnectionUtils {
             }
         }
         return isReachable;
+    }
+
+    public static String FindFirstUsableIp(String iplist,int port){
+        for(String ip:iplist.split(",")){
+            if(IsReachable(ip,port)){
+                return ip;
+            }
+        }
+        return null;
     }
 }

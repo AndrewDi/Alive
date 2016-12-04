@@ -19,6 +19,7 @@
       <element id="file-copy" path="$PROJECT_DIR$/start.sh" />
       <element id="file-copy" path="$PROJECT_DIR$/stop.sh" />
       <element id="file-copy" path="$PROJECT_DIR$/restart.sh" />
+      <element id="file-copy" path="$PROJECT_DIR$/getStatus.sh" />
       <element id="directory" name="src">
         <element id="dir-copy" path="$PROJECT_DIR$/src" />
       </element>

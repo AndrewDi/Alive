@@ -152,13 +152,7 @@ public class UIDJob implements InterruptableJob {
         }catch (MAXRetryLimitException e){
             this.SQLCode=-6;
             this.Status = STATUS_REACH_MAXRETRY;
-        }
-        catch (SQLInvalidAuthorizationSpecException e){
-            //IF SQLState = "28000" Then affect maxretry Times
-            //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
-            //    this.db2InfoModel.addRetry();
-            //}
-            log.error(String.format("[%s] Catch SQLInvalidAuthorizationSpecException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
+            this.disconnect();
         }
         catch (SQLException e) {
             //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
@@ -214,13 +208,13 @@ public class UIDJob implements InterruptableJob {
     private void disconnect()
     {
         try {
+            if(null!=sm){sm.close();sm=null;}
+            if(null!=ps){ps.close();ps=null;}
+            if(null!=rs){rs.close();rs=null;}
             if(null!=connection&&!connection.isClosed()) {
                 connection.close();
                 connection=null;
             }
-            if(null!=sm){sm.close();sm=null;}
-            if(null!=ps){ps.close();ps=null;}
-            if(null!=rs){rs.close();rs=null;}
         } catch (SQLException e1) {
             log.error(String.format("%s:%s",db2InfoModel.toString(),e1.getMessage().toString()));
         }
