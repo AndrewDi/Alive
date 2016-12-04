@@ -105,7 +105,7 @@ public class DB2Info {
         }
         finally {
             try {
-                if(null!=connection) {
+                if(null!=connection&&!connection.isClosed()) {
                     connection.close();
                 }
             } catch (SQLException e) {
