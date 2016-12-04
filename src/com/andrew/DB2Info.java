@@ -23,7 +23,7 @@ public class DB2Info {
         String SQL_CMDB_LDBINFO="SELECT LDBID,DBNAME,VIP AS VIPLIST,PORT,DBUSER,%s,NVL(DBALIAS,DBNAME) AS DBALIAS,VALID,UIDFLAG " +
                 "FROM CMDB.LDBINFO WHERE VALID IN ('Y','M') AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL";
         String SQL_UID_DBUID="SELECT * FROM (SELECT ROW_NUMBER() OVER (partition by LDBID,DBNAME,PORT,VIP ORDER BY LASTUPDATETIME DESC) as rn,LDBID,DBNAME,PORT,VIP,STATUS,TIMESTAMPDIFF(2,CHAR(CURRENT TIMESTAMP - NVL(LASTUPDATETIME,CURRENT TIMESTAMP - 30 MINUTES))) as TONOW,UIDAPP FROM DBI.DBUID) WHERE RN=1 ";
-        String SQL_DELETE_DBUID="DELETE FROM DBI.DBUID WHERE LDBID=? AND DBNAME=? AND VIP=?";
+        //String SQL_DELETE_DBUID="DELETE FROM DBI.DBUID WHERE LDBID=? AND DBNAME=? AND VIP=?";
         try {
             connection = ConnectionUtils.getConnection(AppConf.getConf().getDbmdb_ip(),AppConf.getConf().getDbmdb_port(),AppConf.getConf().getDbmdb_dbname(),AppConf.getConf().getDbmdb_username(),AppConf.getConf().getDbmdb_passwd());
             PreparedStatement ps = null;
