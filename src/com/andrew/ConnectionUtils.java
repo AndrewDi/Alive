@@ -37,6 +37,7 @@ public class ConnectionUtils {
     public static Boolean IsReachable(String ip,int port){
         Boolean isReachable = false;
         Socket socket = new Socket();
+        if(ip.isEmpty()||null==ip){return false;}
         try {
             socket.connect(new InetSocketAddress(ip,port),5000);
             isReachable = socket.isConnected();

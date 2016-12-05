@@ -267,6 +267,9 @@ public class AliveSchedule {
                         this.AddJob(db2InfoModel);
                         log.info("Add new Job to List:" + db2InfoModel.toFullString());
                     }
+                    else {
+                        log.error("Can not find Useable IP:"+db2InfoModel.toFullString());
+                    }
                 }
             }
             else if (currentInfo!=null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&!currentInfo.equals(db2InfoModel)){
