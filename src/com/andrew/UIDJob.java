@@ -197,6 +197,7 @@ public class UIDJob implements InterruptableJob {
                 }
             }
             this.disconnect();
+            this.changeIP();
         }catch (Exception e){
             this.SQLCode=-4;
             if(!this.jobDataMap.containsKey("Interrupt")){
@@ -207,6 +208,7 @@ public class UIDJob implements InterruptableJob {
                 this.jobDataMap.remove("Interrupt");
             }
             this.disconnect();
+            this.changeIP();
         }
         finally {
             this.db2InfoModel.setSQLCode(this.SQLCode);
@@ -233,6 +235,15 @@ public class UIDJob implements InterruptableJob {
             }
         } catch (SQLException e1) {
             log.error(String.format("%s:%s",db2InfoModel.toString(),e1.getMessage().toString()));
+        }
+    }
+
+    private void changeIP(){
+        if(ConnectionUtils.IsReachable(db2InfoModel.getIP(), db2InfoModel.getPort())){
+            return;
+        }
+        else {
+            this.db2InfoModel.setIP(ConnectionUtils.FindFirstUsableIp(this.db2InfoModel.getVIPList(),this.db2InfoModel.getPort()));
         }
     }
 }
