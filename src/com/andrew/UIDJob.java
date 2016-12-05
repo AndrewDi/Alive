@@ -66,7 +66,7 @@ public class UIDJob implements InterruptableJob {
     private Boolean createTab() throws SQLException {
         //Check If Test Table has been create
         sm = connection.createStatement();
-        rs = sm.executeQuery("SELECT COUNT(*) as TABCOUNT FROM SYSCAT.TABLES WHERE TABNAME='UIDCHECK' AND TABSCHEMA='DBX'");
+        rs = sm.executeQuery("SELECT COUNT(*) as TABCOUNT FROM SYSCAT.TABLES WHERE TABNAME='UIDCHECK' AND TABSCHEMA='DBX' WITH CS");
 
         rs.next();
         int tabExists = rs.getInt("TABCOUNT");
@@ -74,8 +74,8 @@ public class UIDJob implements InterruptableJob {
         if(null!=sm){sm.close();}
         if (tabExists == 0)
         {
-            log.info("CREATE TABLE DBA.TEST(id varchar(32),opr char(1),checktime timestamp)");
-            return connection.createStatement().execute("CREATE TABLE DBX.UIDCHECK(id varchar(32),appflag varchar(32),checktime timestamp)");
+            log.info("CREATE TABLE DBA.TEST(ID VARCHAR(32),OPR CHAR(1),CHECKTIME TIMESTAMP)");
+            return connection.createStatement().execute("CREATE TABLE DBX.UIDCHECK(ID VARCHAR(32),APPFLAG VARCHAR(32),CHECKTIME TIMESTAMP)");
         }
         return true;
     }
@@ -174,7 +174,8 @@ public class UIDJob implements InterruptableJob {
                             if(!vip.equals(db2InfoModel.getIP())){
                                 try {
                                     connection=ConnectionUtils.getConnection(vip,this.db2InfoModel.getPort(),this.db2InfoModel.getDBAlias(),this.db2InfoModel.getUser(),this.db2InfoModel.getPasswd());
-                                    if(connection!=null&&connection.isValid(5)&&!connection.isReadOnly()){
+                                    if(connection!=null&&createTab()&&!connection.isClosed()&&!connection.isReadOnly()){
+                                        connection.createStatement().execute("SELECT * FROM DBX.UIDCHECK FETCH FIRST 1 ROWS ONLY WITH CS");
                                         this.db2InfoModel.setIP(vip);
                                         log.info("[HADR] Found non-HADR ip:"+this.db2InfoModel.toFullString());
                                         break;
