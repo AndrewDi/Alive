@@ -34,14 +34,14 @@ public class DB2Info {
             if(AppConf.getConf().getEncryptPass().trim().isEmpty()||AppConf.getConf().getEncryptPass().equals("")){
                 SQL_CMDB_UIDLIST=String.format(SQL_CMDB_UIDLIST,"DBPASS");
                 ps = connection.prepareStatement(SQL_CMDB_UIDLIST);
-                ps.setString(1,AppConf.getConf().getUid_flag());
+                ps.setString(1, AppConf.getConf().getUid_flag());
             }
             else{
                 SQL_CMDB_UIDLIST=String.format(SQL_CMDB_UIDLIST,"DECRYPT_CHAR(CAST(DBPASS AS VARCHAR(128) FOR BIT DATA),?) AS DBPASS");
                 log.debug("EncryptPass:["+AppConf.getConf().getEncryptPass().length()+"]"+AppConf.getConf().getEncryptPass());
                 ps = connection.prepareStatement(SQL_CMDB_UIDLIST);
                 ps.setString(1, AppConf.getConf().getEncryptPass());
-                ps.setString(2,AppConf.getConf().getUid_flag());
+                ps.setString(2, AppConf.getConf().getUid_flag());
             }
             log.debug(SQL_CMDB_UIDLIST);
             ResultSet rs = ps.executeQuery();
