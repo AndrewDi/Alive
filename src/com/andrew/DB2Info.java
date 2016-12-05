@@ -21,7 +21,7 @@ public class DB2Info {
         //String SQL_CMDB_LDBINFO="SELECT LDBID,DBNAME,VIP AS VIPLIST,PORT,DBUSER,CASE WHEN ? IS NULL THEN DBPASS ELSE DECRYPT_CHAR(CAST(DBPASS AS VARCHAR(128) FOR BIT DATA),?) END AS DBPASS,NVL(DBALIAS,DBNAME) AS DBALIAS,VALID,UIDFLAG " +
         //        "FROM CMDB.LDBINFO WHERE VALID IN ('Y','M') AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL";
         String SQL_CMDB_UIDLIST="SELECT DBNAME,DBALIAS,LDBID,DBUSER,VALID,UIDFLAG,%s,VIP,FULLVIP AS VIPLIST,PORT,STATUS,UIDAPP,TIMESTAMPDIFF(2,CHAR(CURRENT TIMESTAMP - NVL(LASTUPDATETIME,CURRENT TIMESTAMP - 30 MINUTES))) as TONOW " +
-                "FROM DBI.V_DBUIDLIST WHERE RID=1 AND UIDFLAG=? AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL WITH UR";
+                "FROM DBI.V_DBUIDLIST WHERE RID=1 AND UIDFLAG=? AND (UIDAPPLIST IS NULL OR UIDAPPLIST LIKE ?) AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL WITH UR";
         /**
         String SQL_CMDB_LDBINFO="SELECT LDBID,DBNAME,VIP AS VIPLIST,PORT,DBUSER,%s,NVL(DBALIAS,DBNAME) AS DBALIAS,VALID,UIDFLAG " +
                 "FROM CMDB.LDBINFO WHERE VALID IN ('Y','M') AND VIP IS NOT NULL AND PORT IS NOT NULL AND DBNAME IS NOT NULL AND DBUSER IS NOT NULL";
@@ -35,6 +35,7 @@ public class DB2Info {
                 SQL_CMDB_UIDLIST=String.format(SQL_CMDB_UIDLIST,"DBPASS");
                 ps = connection.prepareStatement(SQL_CMDB_UIDLIST);
                 ps.setString(1, AppConf.getConf().getUid_flag());
+                ps.setString(2,"%"+AppConf.getConf().getAppFlag()+"%");
             }
             else{
                 SQL_CMDB_UIDLIST=String.format(SQL_CMDB_UIDLIST,"DECRYPT_CHAR(CAST(DBPASS AS VARCHAR(128) FOR BIT DATA),?) AS DBPASS");
@@ -42,6 +43,7 @@ public class DB2Info {
                 ps = connection.prepareStatement(SQL_CMDB_UIDLIST);
                 ps.setString(1, AppConf.getConf().getEncryptPass());
                 ps.setString(2, AppConf.getConf().getUid_flag());
+                ps.setString(3, "%" +AppConf.getConf().getAppFlag()+"%");
             }
             log.debug(SQL_CMDB_UIDLIST);
             ResultSet rs = ps.executeQuery();

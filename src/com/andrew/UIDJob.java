@@ -114,17 +114,20 @@ public class UIDJob implements InterruptableJob {
                 connection=ConnectionUtils.getConnection(db2InfoModel.getIP(),db2InfoModel.getPort(),db2InfoModel.getDBAlias(),db2InfoModel.getUser(),db2InfoModel.getPasswd());
                 if(this.isuseshortconnection==0){jobDataMap.put("connection",connection);}
                 if(null==this.connection){
-                    throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toString()),"Connect-Failed",-2);
+                    this.changeIP();
+                    throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toFullString()),"Connect-Failed",-2);
                 }
                 this.db2InfoModel.setLastConnectTime(LocalDateTime.now());
                 this.aliveSchedule.addConnection(this.db2InfoModel.toString(),connection);
             }
 
 
+            /**
             this.Status = STATUS_CREATE_TABLE;
             if(!createTab()) {
                 throw new SQLException(String.format("Can not create table For %s",db2InfoModel.toString()),"Create-Failed",-3);
             }
+             **/
 
 
             //Do Insert Test
@@ -187,6 +190,23 @@ public class UIDJob implements InterruptableJob {
                             }
                         }
                     }
+                    else if(this.SQLCode==-204){
+                        try {
+                            if(this.createTab()){
+                                this.SQLCode=0;
+                            }
+                            this.Status = STATUS_CREATE_TABLE;
+                        } catch (SQLException e1) {
+                            log.error(e1.getMessage().toString());
+                            if(e1 instanceof DB2Diagnosable) {
+                                DB2Diagnosable diagnosable1 = (DB2Diagnosable) e;
+                                DB2Sqlca sqlca1 = diagnosable1.getSqlca();
+                                if (sqlca1 != null) {
+                                    this.SQLCode = sqlca1.getSqlCode();
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     log.error(String.format("[%s] Catch SQLException ErrorCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
@@ -197,7 +217,6 @@ public class UIDJob implements InterruptableJob {
                 }
             }
             this.disconnect();
-            this.changeIP();
         }catch (Exception e){
             this.SQLCode=-4;
             if(!this.jobDataMap.containsKey("Interrupt")){
@@ -208,7 +227,6 @@ public class UIDJob implements InterruptableJob {
                 this.jobDataMap.remove("Interrupt");
             }
             this.disconnect();
-            this.changeIP();
         }
         finally {
             this.db2InfoModel.setSQLCode(this.SQLCode);
