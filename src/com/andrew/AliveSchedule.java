@@ -298,7 +298,7 @@ public class AliveSchedule {
                 if(db2InfoModel.getIP()!=null&&db2InfoModel.getPort()>0&&updateable) {
                     this.db2InfoList.AddDB2Info(db2InfoModel);
                     this.AddJob(db2InfoModel);
-                    log.info("update Job before in List:"+currentInfo.toFullString());
+                    //log.info("update Job before in List:"+currentInfo.toFullString());
                     log.info("Update Job in List:"+db2InfoModel.toFullString());
                 }
                 else {
