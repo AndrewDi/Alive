@@ -174,7 +174,7 @@ public class UIDJob implements InterruptableJob {
                             if(!vip.equals(db2InfoModel.getIP())){
                                 try {
                                     connection=ConnectionUtils.getConnection(vip,this.db2InfoModel.getPort(),this.db2InfoModel.getDBAlias(),this.db2InfoModel.getUser(),this.db2InfoModel.getPasswd());
-                                    if(connection!=null&&createTab()&&!connection.isClosed()&&!connection.isReadOnly()){
+                                    if(connection!=null&&createTab()){
                                         connection.createStatement().execute("SELECT * FROM DBX.UIDCHECK FETCH FIRST 1 ROWS ONLY WITH CS");
                                         this.db2InfoModel.setIP(vip);
                                         log.info("[HADR] Found non-HADR ip:"+this.db2InfoModel.toFullString());

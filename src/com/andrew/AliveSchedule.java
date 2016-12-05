@@ -276,8 +276,8 @@ public class AliveSchedule {
                 Boolean updateable = true;
                 if(!currentInfo.getIP().equals(db2InfoModel.getIP())&&db2InfoModel.getVIPList().contains(currentInfo.getIP())&&ConnectionUtils.IsReachable(currentInfo.getIP(),db2InfoModel.getPort())){
                     db2InfoModel.setIP(currentInfo.getIP());
-                    updateable=false;
-                    continue;
+                    //updateable=false;
+                    //continue;
                 }
                 else if(!currentInfo.getIP().equals(db2InfoModel.getIP())&&db2InfoModel.getVIPList().contains(currentInfo.getIP())&&!ConnectionUtils.IsReachable(currentInfo.getIP(),currentInfo.getPort())){
                     String validIP = ConnectionUtils.FindFirstUsableIp(db2InfoModel.getVIPList(),db2InfoModel.getPort());
