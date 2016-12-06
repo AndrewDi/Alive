@@ -22,6 +22,7 @@ public class DB2InfoModel {
     private String Status;
     private String Message;
     private String UIDApp;
+    private String ADVANCEUIDAPP;
     private String VIPList;
     private String UIDFlag;
     private LocalDateTime LastConnectTime;
@@ -186,6 +187,14 @@ public class DB2InfoModel {
 
     public void setUIDFlag(String UIDFlag) {
         this.UIDFlag = UIDFlag;
+    }
+
+    public String getADVANCEUIDAPP() {
+        return ADVANCEUIDAPP;
+    }
+
+    public void setADVANCEUIDAPP(String ADVANCEUIDAPP) {
+        this.ADVANCEUIDAPP = ADVANCEUIDAPP;
     }
 
     @Override

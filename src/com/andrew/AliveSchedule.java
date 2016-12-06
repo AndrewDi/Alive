@@ -247,19 +247,19 @@ public class AliveSchedule {
             }
         });
         **/
-
+        String AppFlag = AppConf.getConf().getAppFlag();
         for(DB2InfoModel db2InfoModel:db2NewInfoList.values()){
             DB2InfoModel currentInfo = this.db2InfoList.getDB2Info(db2InfoModel.toString());
-            if(db2InfoModel.getUIDApp()==null){
+            if(db2InfoModel.getUIDApp()==null||AppFlag.equals(db2InfoModel.getADVANCEUIDAPP())){
                 db2InfoModel.setUIDApp(AppConf.getConf().getAppFlag());
             }
             if(currentInfo==null){
-                if(db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())) {
+                if((db2InfoModel.getUIDApp().equals(AppFlag)||AppFlag.equals(db2InfoModel.getADVANCEUIDAPP()))&&ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())) {
                     this.db2InfoList.AddDB2Info(db2InfoModel);
                     this.AddJob(db2InfoModel);
                     log.info("Add new Job to List:" + db2InfoModel.toFullString());
                 }
-                else if(db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&!ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
+                else if((db2InfoModel.getUIDApp().equals(AppFlag)||AppFlag.equals(db2InfoModel.getADVANCEUIDAPP()))&&!ConnectionUtils.IsReachable(db2InfoModel.getIP(),db2InfoModel.getPort())){
                     String validIP = ConnectionUtils.FindFirstUsableIp(db2InfoModel.getVIPList(),db2InfoModel.getPort());
                     if(validIP!=null){
                         db2InfoModel.setIP(validIP);
@@ -272,7 +272,7 @@ public class AliveSchedule {
                     }
                 }
             }
-            else if (currentInfo!=null&&db2InfoModel.getUIDApp().equals(AppConf.getConf().getAppFlag())&&!currentInfo.equals(db2InfoModel)){
+            else if (currentInfo!=null&&db2InfoModel.getUIDApp().equals(AppFlag)&&!currentInfo.equals(db2InfoModel)){
                 Boolean updateable = true;
                 if(!currentInfo.getIP().equals(db2InfoModel.getIP())&&db2InfoModel.getVIPList().contains(currentInfo.getIP())&&ConnectionUtils.IsReachable(currentInfo.getIP(),db2InfoModel.getPort())){
                     db2InfoModel.setIP(currentInfo.getIP());

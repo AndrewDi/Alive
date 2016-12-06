@@ -262,6 +262,7 @@ public class UIDJob implements InterruptableJob {
         }
         else {
             this.db2InfoModel.setIP(ConnectionUtils.FindFirstUsableIp(this.db2InfoModel.getVIPList(),this.db2InfoModel.getPort()));
+            log.info("Found usable ip:"+db2InfoModel.toFullString());
         }
     }
 }
