@@ -22,6 +22,7 @@ public class DB2InfoModel {
     private String Status;
     private String Message;
     private String UIDApp;
+    private String ADVANCEUIDAPP;
     private String VIPList;
     private String UIDFlag;
     private LocalDateTime LastConnectTime;
@@ -188,13 +189,23 @@ public class DB2InfoModel {
         this.UIDFlag = UIDFlag;
     }
 
-    @Override
-    public String toString() {
-        return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();
+    public String getADVANCEUIDAPP() {
+        return ADVANCEUIDAPP;
     }
 
-    public static String makeString(String dbname,String ldbid,String vip,int port){
-        return dbname+":"+ldbid+":"+vip+":"+port;
+    public void setADVANCEUIDAPP(String ADVANCEUIDAPP) {
+        this.ADVANCEUIDAPP = ADVANCEUIDAPP;
+    }
+
+    @Override
+    public String toString() {
+        return this.getDBName()+":"+this.getLDBID();
+    }
+
+    public String toFullString() {return this.getDBName()+":"+this.getLDBID()+":"+this.getIP()+":"+this.getPort();}
+
+    public static String makeString(String dbname,String ldbid){
+        return dbname+":"+ldbid;
     }
     @Override
     public boolean equals(Object o) {

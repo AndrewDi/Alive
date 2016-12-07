@@ -66,7 +66,7 @@ public class UIDJob implements InterruptableJob {
     private Boolean createTab() throws SQLException {
         //Check If Test Table has been create
         sm = connection.createStatement();
-        rs = sm.executeQuery("SELECT COUNT(*) as TABCOUNT FROM SYSCAT.TABLES WHERE TABNAME='UIDCHECK' AND TABSCHEMA='DBX'");
+        rs = sm.executeQuery("SELECT COUNT(*) as TABCOUNT FROM SYSCAT.TABLES WHERE TABNAME='UIDCHECK' AND TABSCHEMA='DBX' WITH CS");
 
         rs.next();
         int tabExists = rs.getInt("TABCOUNT");
@@ -74,8 +74,8 @@ public class UIDJob implements InterruptableJob {
         if(null!=sm){sm.close();}
         if (tabExists == 0)
         {
-            log.info("CREATE TABLE DBA.TEST(id varchar(32),opr char(1),checktime timestamp)");
-            return connection.createStatement().execute("CREATE TABLE DBX.UIDCHECK(id varchar(32),appflag varchar(32),checktime timestamp)");
+            log.info("CREATE TABLE DBA.TEST(ID VARCHAR(32),OPR CHAR(1),CHECKTIME TIMESTAMP)");
+            return connection.createStatement().execute("CREATE TABLE DBX.UIDCHECK(ID VARCHAR(32),APPFLAG VARCHAR(32),CHECKTIME TIMESTAMP)");
         }
         return true;
     }
@@ -114,17 +114,20 @@ public class UIDJob implements InterruptableJob {
                 connection=ConnectionUtils.getConnection(db2InfoModel.getIP(),db2InfoModel.getPort(),db2InfoModel.getDBAlias(),db2InfoModel.getUser(),db2InfoModel.getPasswd());
                 if(this.isuseshortconnection==0){jobDataMap.put("connection",connection);}
                 if(null==this.connection){
-                    throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toString()),"Connect-Failed",-2);
+                    this.changeIP();
+                    throw new SQLException(String.format("Failed Init Connection For %s",db2InfoModel.toFullString()),"Connect-Failed",-2);
                 }
                 this.db2InfoModel.setLastConnectTime(LocalDateTime.now());
                 this.aliveSchedule.addConnection(this.db2InfoModel.toString(),connection);
             }
 
 
+            /**
             this.Status = STATUS_CREATE_TABLE;
             if(!createTab()) {
                 throw new SQLException(String.format("Can not create table For %s",db2InfoModel.toString()),"Create-Failed",-3);
             }
+             **/
 
 
             //Do Insert Test
@@ -152,13 +155,7 @@ public class UIDJob implements InterruptableJob {
         }catch (MAXRetryLimitException e){
             this.SQLCode=-6;
             this.Status = STATUS_REACH_MAXRETRY;
-        }
-        catch (SQLInvalidAuthorizationSpecException e){
-            //IF SQLState = "28000" Then affect maxretry Times
-            //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
-            //    this.db2InfoModel.addRetry();
-            //}
-            log.error(String.format("[%s] Catch SQLInvalidAuthorizationSpecException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
+            this.disconnect();
         }
         catch (SQLException e) {
             //if(e.getSQLState()=="28000"&&db2InfoModel.getSQLCode()!=-6) {
@@ -175,7 +172,40 @@ public class UIDJob implements InterruptableJob {
                     log.error(String.format("[%s] Catch SQLException SQLCode:%d SQLState:%s",db2InfoModel.toString(),this.SQLCode,this.Message));
                     //IF HADR Related Error,No more try
                     if(this.SQLCode==-1776||this.SQLCode==-1773){
-                        //this.db2InfoModel.setMaxRetry(AppConf.getConf().getMaxRetries());
+                        log.error("[HADR] Found HADR IP:"+this.db2InfoModel.toFullString());
+                        for(String vip:this.db2InfoModel.getVIPList().split(",")){
+                            if(!vip.equals(db2InfoModel.getIP())){
+                                try {
+                                    connection=ConnectionUtils.getConnection(vip,this.db2InfoModel.getPort(),this.db2InfoModel.getDBAlias(),this.db2InfoModel.getUser(),this.db2InfoModel.getPasswd());
+                                    if(connection!=null&&createTab()){
+                                        connection.createStatement().execute("SELECT * FROM DBX.UIDCHECK FETCH FIRST 1 ROWS ONLY WITH CS");
+                                        this.db2InfoModel.setIP(vip);
+                                        log.info("[HADR] Found non-HADR ip:"+this.db2InfoModel.toFullString());
+                                        break;
+                                    }
+                                }
+                                catch (SQLException connectSQLException){
+                                    this.disconnect();
+                                }
+                            }
+                        }
+                    }
+                    else if(this.SQLCode==-204){
+                        try {
+                            if(this.createTab()){
+                                this.SQLCode=0;
+                            }
+                            this.Status = STATUS_CREATE_TABLE;
+                        } catch (SQLException e1) {
+                            log.error(e1.getMessage().toString());
+                            if(e1 instanceof DB2Diagnosable) {
+                                DB2Diagnosable diagnosable1 = (DB2Diagnosable) e;
+                                DB2Sqlca sqlca1 = diagnosable1.getSqlca();
+                                if (sqlca1 != null) {
+                                    this.SQLCode = sqlca1.getSqlCode();
+                                }
+                            }
+                        }
                     }
                 }
                 else {
@@ -186,6 +216,7 @@ public class UIDJob implements InterruptableJob {
                     log.error(String.format("[%s] Catch SQLException ErrorCode:%d SQLState:%s", db2InfoModel.toString(),this.SQLCode,this.Message));
                 }
             }
+            this.disconnect();
         }catch (Exception e){
             this.SQLCode=-4;
             if(!this.jobDataMap.containsKey("Interrupt")){
@@ -195,6 +226,7 @@ public class UIDJob implements InterruptableJob {
             else {
                 this.jobDataMap.remove("Interrupt");
             }
+            this.disconnect();
         }
         finally {
             this.db2InfoModel.setSQLCode(this.SQLCode);
@@ -212,15 +244,25 @@ public class UIDJob implements InterruptableJob {
     private void disconnect()
     {
         try {
+            if(null!=sm){sm.close();sm=null;}
+            if(null!=ps){ps.close();ps=null;}
+            if(null!=rs){rs.close();rs=null;}
             if(null!=connection&&!connection.isClosed()) {
                 connection.close();
                 connection=null;
             }
-            if(null!=sm){sm.close();sm=null;}
-            if(null!=ps){ps.close();ps=null;}
-            if(null!=rs){rs.close();rs=null;}
         } catch (SQLException e1) {
             log.error(String.format("%s:%s",db2InfoModel.toString(),e1.getMessage().toString()));
+        }
+    }
+
+    private void changeIP(){
+        if(ConnectionUtils.IsReachable(db2InfoModel.getIP(), db2InfoModel.getPort())){
+            return;
+        }
+        else {
+            this.db2InfoModel.setIP(ConnectionUtils.FindFirstUsableIp(this.db2InfoModel.getVIPList(),this.db2InfoModel.getPort()));
+            log.info("Found usable ip:"+db2InfoModel.toFullString());
         }
     }
 }
